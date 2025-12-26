@@ -3,13 +3,12 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 
 const logoutBtn = document.getElementById("logout-btn");
 const agregarLink = document.querySelector('a[href="agregar.html"]');
-const loadingText = document.getElementById("loading-auth");
+const loading = document.getElementById("loading-auth");
 
 const ADMIN_EMAIL = "sergiosanchezbenito@gmail.com";
 
 onAuthStateChanged(auth, (user) => {
-  // ocultamos el texto "Cargando..."
-  if (loadingText) loadingText.style.display = "none";
+  if (loading) loading.style.display = "none";
 
   if (user) {
     logoutBtn.style.display = "inline";
@@ -25,10 +24,8 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    signOut(auth).then(() => {
-      window.location.href = "index.html";
-    });
+logoutBtn?.addEventListener("click", () => {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
   });
-}
+});

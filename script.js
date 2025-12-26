@@ -14,24 +14,14 @@ onAuthStateChanged(auth, (user) => {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const nombre = document.getElementById("nombre").value;
-  const ingredientes = document.getElementById("ingredientes").value;
-  const pasos = document.getElementById("pasos").value;
+  await addDoc(collection(db, "recetas"), {
+    nombre: nombre.value,
+    ingredientes: ingredientes.value,
+    pasos: pasos.value,
+    usuario: auth.currentUser.email,
+    creada: new Date()
+  });
 
-  try {
-    await addDoc(collection(db, "recetas"), {
-      nombre: nombre,
-      ingredientes: ingredientes,
-      pasos: pasos,
-      usuario: auth.currentUser.email,
-      creada: new Date()
-    });
-
-    alert("Receta guardada correctamente");
-    form.reset();
-
-  } catch (error) {
-    alert("Error al guardar la receta");
-    console.error(error);
-  }
+  alert("Receta guardada");
+  form.reset();
 });
