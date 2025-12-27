@@ -1,34 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Mis Recetas - Agregar</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <title>Agregar receta</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+    <nav>
+        <h1>Mis Recetas</h1>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="buscar.html">Buscar recetas</a></li>
+            <li><a href="agregar.html">Agregar receta</a></li>
+        </ul>
+    </nav>
 
-<nav>
-  <h1>Mis Recetas</h1>
-  <ul>
-    <li><a href="index.html">Inicio</a></li>
-    <li><a href="buscar.html">Buscar recetas</a></li>
-    <li><a href="agregar.html">Agregar receta</a></li>
-  </ul>
-  <button id="logout-btn" style="display:none;">Cerrar sesión</button>
-  <span id="loading-auth">Cargando...</span>
-</nav>
+    <main>
+        <h2>Agregar nueva receta</h2>
 
-<main>
-  <h2>Agregar nueva receta</h2>
-  <form>
-    <input id="nombre" placeholder="Nombre"><br><br>
-    <textarea id="ingredientes" placeholder="Ingredientes"></textarea><br><br>
-    <textarea id="pasos" placeholder="Pasos"></textarea><br><br>
-    <button type="submit">Guardar receta</button>
-  </form>
-</main>
+        <form id="form-receta">
+            <input type="text" id="nombre" placeholder="Nombre" required>
+            <textarea id="ingredientes" placeholder="Ingredientes" required></textarea>
+            <textarea id="pasos" placeholder="Pasos" required></textarea>
+            <button type="submit">Guardar receta</button>
+        </form>
+    </main>
 
-<script type="module" src="script.js"></script>
-<script type="module" src="menu.js"></script>
-
+    <script type="module" src="agregar.js"></script>
 </body>
 </html>

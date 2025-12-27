@@ -1,43 +1,34 @@
-import { auth } from "./firebase-config.js";
+// script.js
 import { db } from "./firebase-config.js";
-import { addDoc, collection } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const form = document.querySelector("form");
+const form = document.getElementById("form-receta");
 
-if (!form) {
-  // No estamos en agregar.html
-  console.warn("Formulario no encontrado");
-} else {
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.href = "login.html";
-    }
-  });
+  const nombre = document.getElementById("nombre").value.trim();
+  const ingredientes = document.getElementById("ingredientes").value.trim();
+  const pasos = document.getElementById("pasos").value.trim();
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (!nombre || !ingredientes || !pasos) {
+    alert("Rellena todos los campos");
+    return;
+  }
 
-    const nombre = document.getElementById("nombre").value;
-    const ingredientes = document.getElementById("ingredientes").value;
-    const pasos = document.getElementById("pasos").value;
+  try {
+    await addDoc(collection(db, "recetas"), {
+      nombre,
+      ingredientes,
+      pasos,
+      creada: new Date()
+    });
 
-    try {
-      await addDoc(collection(db, "recetas"), {
-        nombre,
-        ingredientes,
-        pasos,
-        usuario: auth.currentUser.email,
-        creada: new Date()
-      });
+    alert("Receta guardada correctamente");
+    form.reset();
 
-      alert("Receta guardada");
-      form.reset();
-
-    } catch (error) {
-      console.error("Error al guardar la receta:", error);
-      alert("Error al guardar la receta");
-    }
-  });
-}
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    alert("Error al guardar la receta");
+  }
+});

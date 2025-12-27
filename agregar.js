@@ -1,16 +1,33 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { addDoc, collection } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+const ADMIN_EMAIL = "sergiosanchezbenito@gmail.com";
+const form = document.getElementById("form-receta");
+
+/* 🔒 PROTECCIÓN */
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
+  if (!user || user.email !== ADMIN_EMAIL) {
     window.location.href = "login.html";
   }
 });
 
-window.guardarReceta = function () {
-  const nombre = document.getElementById("nombre").value;
-  const ingredientes = document.getElementById("ingredientes").value;
-  const pasos = document.getElementById("pasos").value;
+/* 💾 GUARDAR RECETA */
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  alert("Receta guardada (aún no en base de datos)");
-};
+  try {
+    await addDoc(collection(db, "recetas"), {
+      nombre: document.getElementById("nombre").value,
+      ingredientes: document.getElementById("ingredientes").value,
+      pasos: document.getElementById("pasos").value,
+      creada: new Date()
+    });
+
+    alert("Receta guardada");
+    form.reset();
+  } catch (error) {
+    console.error(error);
+    alert("Error al guardar");
+  }
+});

@@ -1,11 +1,10 @@
-import { db } from "./firebase-config.js";
-import { auth } from "./firebase-config.js";
+import { db, auth } from "./firebase-config.js";
 import {
-    collection,
-    getDocs,
-    deleteDoc,
-    doc,
-    updateDoc
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
@@ -13,112 +12,86 @@ const lista = document.getElementById("lista-recetas");
 const buscador = document.getElementById("buscador");
 
 let recetas = [];
-let usuarioActual = null;
+let esAdmin = false;
 
-// Saber si estás logueado
+// comprobar sesión
 onAuthStateChanged(auth, (user) => {
-    usuarioActual = user;
-    cargarRecetas();
+  esAdmin = !!user && user.email === "sergiosanchezbenito@gmail.com";
+  cargarRecetas();
 });
 
-function mostrarRecetas(recetasAMostrar) {
-    lista.innerHTML = "";
+// pintar recetas
+function mostrarRecetas(datos) {
+  lista.innerHTML = "";
 
-    recetasAMostrar.forEach((receta) => {
-        const div = document.createElement("div");
-        div.style.marginBottom = "20px"; // Separación entre recetas
-        div.innerHTML = `
-            <h3>${receta.nombre}</h3>
-            <p><strong>Ingredientes:</strong></p>
-            <p>${receta.ingredientes}</p>
-            <p><strong>Pasos:</strong></p>
-            <p>${receta.pasos}</p>
-        `;
+  datos.forEach((receta) => {
+    const card = document.createElement("div");
+    card.className = "receta-card";
 
-        // Contenedor de botones
-        const botonesDiv = document.createElement("div");
-        botonesDiv.className = "botones"; // usar la clase CSS
-        // Botón Eliminar
-        const btn = document.createElement("button");
-        btn.textContent = "Eliminar";
-        btn.addEventListener("click", async () => {
-            if (confirm("¿Seguro que quieres eliminar esta receta?")) {
-                await deleteDoc(doc(db, "recetas", receta.id));
-                cargarRecetas();
-            }
-        });
-        botonesDiv.appendChild(btn);
+    card.innerHTML = `
+      <h3>${receta.nombre}</h3>
+      <p><strong>Ingredientes:</strong></p>
+      <p>${receta.ingredientes}</p>
+      <p><strong>Pasos:</strong></p>
+      <p>${receta.pasos}</p>
+    `;
 
-        // Botón Editar
-        const editarBtn = document.createElement("button");
-        editarBtn.textContent = "Editar";
-        editarBtn.addEventListener("click", () => {
-            // código del modal (igual que antes)
-        });
-        botonesDiv.appendChild(editarBtn);
+    if (esAdmin) {
+      const botones = document.createElement("div");
+      botones.className = "botones";
 
-        div.appendChild(botonesDiv);
+      // eliminar
+      const eliminarBtn = document.createElement("button");
+      eliminarBtn.textContent = "Eliminar";
+      eliminarBtn.onclick = async () => {
+        if (confirm("¿Eliminar esta receta?")) {
+          await deleteDoc(doc(db, "recetas", receta.id));
+          cargarRecetas();
+        }
+      };
 
+      // editar
+      const editarBtn = document.createElement("button");
+      editarBtn.textContent = "Editar";
+      editarBtn.onclick = async () => {
+        const nombre = prompt("Nombre:", receta.nombre);
+        const ingredientes = prompt("Ingredientes:", receta.ingredientes);
+        const pasos = prompt("Pasos:", receta.pasos);
 
-        // Botón Editar
-        const editarBtn = document.createElement("button");
-        editarBtn.textContent = "Editar";
-        editarBtn.addEventListener("click", () => {
-            // Abrir modal
-            const modal = document.getElementById("modal-editar");
-            modal.style.display = "flex";
+        if (nombre && ingredientes && pasos) {
+          await updateDoc(doc(db, "recetas", receta.id), {
+            nombre,
+            ingredientes,
+            pasos
+          });
+          cargarRecetas();
+        }
+      };
 
-            // Llenar campos con valores actuales
-            document.getElementById("modal-nombre").value = receta.nombre;
-            document.getElementById("modal-ingredientes").value = receta.ingredientes;
-            document.getElementById("modal-pasos").value = receta.pasos;
-
-            // Guardar cambios
-            const guardarBtn = document.getElementById("guardar-cambios");
-            guardarBtn.onclick = async () => {
-                const nuevoNombre = document.getElementById("modal-nombre").value;
-                const nuevosIngredientes = document.getElementById("modal-ingredientes").value;
-                const nuevosPasos = document.getElementById("modal-pasos").value;
-
-                if (nuevoNombre && nuevosIngredientes && nuevosPasos) {
-                    await updateDoc(doc(db, "recetas", receta.id), {
-                        nombre: nuevoNombre,
-                        ingredientes: nuevosIngredientes,
-                        pasos: nuevosPasos
-                    });
-                    alert("Receta actualizada");
-                    modal.style.display = "none";
-                    cargarRecetas();
-                }
-            };
-
-            // Cerrar modal
-            document.getElementById("cerrar-modal").onclick = () => {
-                modal.style.display = "none";
-            };
-        });
-        div.appendChild(editarBtn);
-        div.appendChild(botonesDiv);
+      botones.appendChild(editarBtn);
+      botones.appendChild(eliminarBtn);
+      card.appendChild(botones);
     }
 
-        lista.appendChild(div);
-});
+    lista.appendChild(card);
+  });
 }
 
+// cargar desde firestore
 async function cargarRecetas() {
-    const querySnapshot = await getDocs(collection(db, "recetas"));
-    recetas = querySnapshot.docs.map((docSnap) => {
-        return { id: docSnap.id, ...docSnap.data() };
-    });
-    mostrarRecetas(recetas);
+  const snapshot = await getDocs(collection(db, "recetas"));
+  recetas = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  mostrarRecetas(recetas);
 }
 
-// Filtrado con buscador por nombre o ingredientes
+// buscar
 buscador.addEventListener("input", () => {
-    const texto = buscador.value.toLowerCase();
-    const filtradas = recetas.filter((receta) =>
-        receta.nombre.toLowerCase().includes(texto) ||
-        receta.ingredientes.toLowerCase().includes(texto)
-    );
-    mostrarRecetas(filtradas);
+  const texto = buscador.value.toLowerCase();
+
+  const filtradas = recetas.filter((r) =>
+    r.nombre.toLowerCase().includes(texto) ||
+    r.ingredientes.toLowerCase().includes(texto)
+  );
+
+  mostrarRecetas(filtradas);
 });
