@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Mis Recetas - Buscar</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <nav>
         <h1>Mis Recetas</h1>
@@ -13,16 +15,35 @@
             <li><a href="agregar.html">Agregar receta</a></li>
         </ul>
         <button id="logout-btn" style="display:none;">Cerrar sesión</button>
-<span id="loading-auth">Cargando...</span>
+        <span id="loading-auth">Cargando...</span>
 
     </nav>
 
     <main>
+        <input type="text" id="buscador" placeholder="Buscar receta por nombre">
         <h2>Buscar recetas</h2>
         <div id="lista-recetas"></div>
     </main>
 
     <script type="module" src="menu.js"></script>
+    <script type="module" src="buscar.js"></script>
+    
+<!-- Modal para editar receta -->
+<div id="modal-editar" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="cerrar-modal" class="cerrar">&times;</span>
+        <h2>Editar receta</h2>
+        <label>Nombre:</label>
+        <input type="text" id="modal-nombre"><br><br>
+        <label>Ingredientes:</label>
+        <textarea id="modal-ingredientes"></textarea><br><br>
+        <label>Pasos:</label>
+        <textarea id="modal-pasos"></textarea><br><br>
+        <button id="guardar-cambios">Guardar cambios</button>
+    </div>
+</div>
+
 
 </body>
+
 </html>

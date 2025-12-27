@@ -5,23 +5,39 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/fi
 
 const form = document.querySelector("form");
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-  }
-});
+if (!form) {
+  // No estamos en agregar.html
+  console.warn("Formulario no encontrado");
+} else {
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  await addDoc(collection(db, "recetas"), {
-    nombre: nombre.value,
-    ingredientes: ingredientes.value,
-    pasos: pasos.value,
-    usuario: auth.currentUser.email,
-    creada: new Date()
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
   });
 
-  alert("Receta guardada");
-  form.reset();
-});
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nombre = document.getElementById("nombre").value;
+    const ingredientes = document.getElementById("ingredientes").value;
+    const pasos = document.getElementById("pasos").value;
+
+    try {
+      await addDoc(collection(db, "recetas"), {
+        nombre,
+        ingredientes,
+        pasos,
+        usuario: auth.currentUser.email,
+        creada: new Date()
+      });
+
+      alert("Receta guardada");
+      form.reset();
+
+    } catch (error) {
+      console.error("Error al guardar la receta:", error);
+      alert("Error al guardar la receta");
+    }
+  });
+}
